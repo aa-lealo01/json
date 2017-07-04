@@ -193,13 +193,6 @@
             }
           ]
         },
-		"diagnosticsProfile": {
-          "bootDiagnostics": {
-             "enabled": "false",
-             "storageUri": "http://cdc1storrdsstd01.blob.core.windows.net"
-          }
-        }
-	  },
 	  "resources": [
         {
           "apiVersion": "[variables('apiVersion')]",
