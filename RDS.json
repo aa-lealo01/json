@@ -20,7 +20,7 @@
     },
     "domainUsername": {
       "type": "string",
-      "defaultValue": "Administrator"
+      "defaultValue": "aa-lealo01"
     },
     "domainpassword": {
       "type": "securestring"
