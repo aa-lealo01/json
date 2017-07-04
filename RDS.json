@@ -215,8 +215,8 @@
             "typeHandlerVersion": "2.11",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "ModulesUrl": "[concat(variables('assetLocation'),'Configuration.zip')]",
-              "ConfigurationFunction": "[concat('Configuration.ps1' ,'\\' , parameters('Role'))]",
+              "ModulesUrl": "[concat(variables('assetLocation'),'https://github.com/aa-lealo01/json/blob/master/Configuration.zip')]",
+              "ConfigurationFunction": "[concat('https://github.com/aa-lealo01/json/blob/master/Configuration.ps1' ,'\\' , parameters('Role'))]",
               "Properties": {
                 "domainName": "[parameters('domainToJoin')]",
                 "adminCreds": {
