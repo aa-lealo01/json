@@ -167,8 +167,8 @@
         },
         "osProfile": {
           "computerName": "[concat(parameters('vmNamePrefix'), copyindex(parameters('IndexStart')))]",
-          "adminUsername": "[parameters('vmadminUsername')]",
-          "adminPassword": "[parameters('vmadminPassword')]"
+          "vmAdminUsername": "[parameters('vmAdminUsername')]",
+          "vmAdminPassword": "[parameters('vmaAminPassword')]"
         },
         "storageProfile": {
           "imageReference": {
