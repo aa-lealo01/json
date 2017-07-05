@@ -4,10 +4,7 @@
   "parameters": {
     "adminUsername": {
       "type": "string",
-      "defaultValue": "Fagron"    
-      "metadata": {
-        "description": "The name of the administrator of the new VM and the domain. Exclusion list: 'administrator'"
-      }
+      "defaultValue": "Fagron"
     },
     "adminPassword": {
       "type": "securestring",
