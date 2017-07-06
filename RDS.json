@@ -56,7 +56,6 @@
     },
     "AvSetName": {
       "type": "string"
-      "defaultValue": "CRD"
     },
     "Role": {
       "type": "string",
