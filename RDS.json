@@ -13,7 +13,7 @@
     },
     "storageAccountName": {
       "type": "string",
-      "defaultValue": "P@ssW0rD!"
+      "defaultValue": "cdc1storrdspre01"
       }
     },
     "SubnetName": {
