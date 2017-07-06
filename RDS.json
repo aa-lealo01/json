@@ -113,7 +113,7 @@
 	"NIC_Id": "[resourceId('Microsoft.Network/networkInterfaces',variables('NIC_Name'))]",
     "subnetid": "[concat(variables('vnetID'),'/subnets/', parameters('SubnetName'))]",
 	"numberOfInstances": "[parameters('numberOfInstances')]",
-    "assetLocation": "https://github.com/Azure/azure-quickstart-templates/tree/master/rds-deployment"
+    "assetLocation": "https://github.com/Azure/azure-quickstart-templates/tree/master/rds-deployment/"
   },
   "resources": [
     {
@@ -215,7 +215,7 @@
             "typeHandlerVersion": "2.11",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "ModulesUrl": "[concat(variables('assetLocation'),'./Configuration.zip?raw=true')]",
+              "ModulesUrl": "[concat(variables('assetLocation'),'Configuration.zip?raw=true')]",
               "ConfigurationFunction": "[concat('Configuration.ps1' ,'\\' , parameters('Role'))]",
               "Properties": {
                 "domainName": "[parameters('domainToJoin')]",
