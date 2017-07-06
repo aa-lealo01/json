@@ -113,7 +113,7 @@
 	"NIC_Id": "[resourceId('Microsoft.Network/networkInterfaces',variables('NIC_Name'))]",
     "subnetid": "[concat(variables('vnetID'),'/subnets/', parameters('SubnetName'))]",
 	"numberOfInstances": "[parameters('numberOfInstances')]",
-    "assetLocation": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/rds-deployment/"
+    "assetLocation": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/tree/master/rds-deployment/"
   },
   "resources": [
     {
@@ -215,8 +215,8 @@
             "typeHandlerVersion": "2.11",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "ModulesUrl": "[concat(variables('assetLocation'),'https://github.com/aa-lealo01/json/blob/master/Configuration.zip?raw=true')]",
-              "ConfigurationFunction": "[concat('https://raw.githubusercontent.com/aa-lealo01/json/master/Configuration.ps1' ,'\\' , parameters('Role'))]",
+              "ModulesUrl": "[concat(variables('assetLocation'),'./Configuration.zip?raw=true')]",
+              "ConfigurationFunction": "[concat('Configuration.ps1' ,'\\' , parameters('Role'))]",
               "Properties": {
                 "domainName": "[parameters('domainToJoin')]",
                 "adminCreds": {
