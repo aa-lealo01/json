@@ -14,25 +14,21 @@
     "storageAccountName": {
       "type": "string",
       "defaultValue": "P@ssW0rD!"
-        "Description": "The name of the storage account created to store the VMs disks"
       }
     },
     "SubnetName": {
       "type": "string",
       "defaultValue": "CDCIII-V2-116"
-        "description": "Subnet 1 Name"
       }
     },
     "vmNamePrefix": {
       "type": "string",
       "defaultValue": "CRD100"
-        "description": "Name for virtual machine."
       }
     },
     "virtualnetName": {
       "type": "string",
-      "metadata": {
-        "description": "Name of the Azure virtual network."
+      "defaultValue": "CDCIII-V2"
       }
     },
     "ResourceGroupVNET": {
