@@ -4,31 +4,50 @@
   "parameters": {
     "adminUsername": {
       "type": "string",
-      "defaultValue": "Fagron"
+      "metadata": {
+        "description": "The name of the administrator of the new VM and the domain. Exclusion list: 'administrator'"
+      }
     },
     "adminPassword": {
       "type": "securestring",
-      "defaultValue": "P@ssW0rD!"
+      "metadata": {
+        "description": "The password for the administrator account of the new VM and the domain"
       }
+    },
+    "domainToJoin": {
+      "type": "string",
+      "defaultValue": "adc.local"
+    },
+    "domainUsername": {
+      "type": "string",
+      "defaultValue": "Administrator"
+    },
+    "domainpassword": {
+      "type": "securestring"
     },
     "storageAccountName": {
       "type": "string",
-      "defaultValue": "cdc1storrdspre01"
+      "metadata": {
+        "Description": "The name of the storage account created to store the VMs disks"
       }
     },
     "SubnetName": {
       "type": "string",
-      "defaultValue": "CDCIII-V2-116"
+      "defaultValue": "",
+      "metadata": {
+        "description": "Subnet 1 Name"
       }
     },
     "vmNamePrefix": {
       "type": "string",
-      "defaultValue": "CRD100"
+      "metadata": {
+        "description": "Name for virtual machine."
       }
     },
     "virtualnetName": {
       "type": "string",
-      "defaultValue": "CDCIII-V2"
+      "metadata": {
+        "description": "Name of the Azure virtual network."
       }
     },
     "ResourceGroupVNET": {
@@ -37,11 +56,10 @@
     },
     "AvSetName": {
       "type": "string"
-      "defaultValue": "CRD"
     },
     "Role": {
       "type": "string",
-      "defaultValue": "SessionHost"
+      "metadata": {
         "description": "The function in the DSC script"
       }
     },
@@ -49,7 +67,7 @@
       "type": "int",
       "defaultValue": 1,
 	  "metadata": {
-                "description": "Start instance"
+                "description": "Number of instances"
             }
     },
 	"numberOfInstances": {
@@ -61,7 +79,7 @@
     },
     "VirtualMachineSize": {
       "type": "string",
-      "defaultValue": "Standard_DS13_V2",
+      "defaultValue": "Standard_D2_v2",
       "allowedValues": [
         "Standard_A2",
         "Standard_A3",
@@ -95,7 +113,7 @@
 	"NIC_Id": "[resourceId('Microsoft.Network/networkInterfaces',variables('NIC_Name'))]",
     "subnetid": "[concat(variables('vnetID'),'/subnets/', parameters('SubnetName'))]",
 	"numberOfInstances": "[parameters('numberOfInstances')]",
-    "assetLocation": "https://github.com/Azure/azure-quickstart-templates/tree/master/rds-deployment"
+    "assetLocation": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/rds-deployment/"
   },
   "resources": [
     {
@@ -149,8 +167,8 @@
         },
         "osProfile": {
           "computerName": "[concat(parameters('vmNamePrefix'), copyindex(parameters('IndexStart')))]",
-          "AdminUsername": "[parameters('adminUsername')]",
-          "AdminPassword": "[parameters('adminPassword')]"
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
         },
         "storageProfile": {
           "imageReference": {
@@ -175,6 +193,13 @@
             }
           ]
         },
+		"diagnosticsProfile": {
+          "bootDiagnostics": {
+             "enabled": "true",
+             "storageUri": "http://cdc1storrdsstd01.blob.core.windows.net"
+          }
+        }
+	  },
 	  "resources": [
         {
           "apiVersion": "[variables('apiVersion')]",
@@ -209,4 +234,5 @@
         }
       ]
 	}
+    ]
   }  
