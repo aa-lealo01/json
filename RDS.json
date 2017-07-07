@@ -215,7 +215,7 @@
             "typeHandlerVersion": "2.11",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "ModulesUrl": "[concat(variables('assetLocation'),'Configuration.zip?raw=true'')]",
+              "ModulesUrl": "[concat(variables('assetLocation'),'/Configuration.zip')]",
               "ConfigurationFunction": "[concat('Configuration.ps1' ,'\\' , parameters('Role'))]",
               "Properties": {
                 "domainName": "[parameters('domainToJoin')]",
