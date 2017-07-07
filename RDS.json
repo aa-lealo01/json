@@ -113,7 +113,7 @@
 	"NIC_Id": "[resourceId('Microsoft.Network/networkInterfaces',variables('NIC_Name'))]",
     "subnetid": "[concat(variables('vnetID'),'/subnets/', parameters('SubnetName'))]",
 	"numberOfInstances": "[parameters('numberOfInstances')]",
-    "assetLocation": "https://github.com/Azure/azure-quickstart-templates/tree/master/rds-deployment/"
+    "assetLocation": "https://raw.githubusercontent.com/aa-lealo01/json/master/"
   },
   "resources": [
     {
