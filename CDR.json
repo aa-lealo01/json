@@ -111,7 +111,7 @@
 	"NIC_Id": "[resourceId('Microsoft.Network/networkInterfaces',variables('NIC_Name'))]",
 	"LoadBalancerExt": "[concat(variables('AvailabilitySetName'),'-LB-EXT')]",
 	"lbextID": "[resourceId('Microsoft.Network/loadBalancers',variables('LoadBalancerExt'))]",
-	"PublicIP": "cdcvipublicipcdg",
+	"PublicIP": "cdc1publicipcdg",
 	"publicIPID": "[resourceID('Microsoft.Network/publicIPAddresses',variables('PublicIP'))]",
 	"LoadBalancerInt": "[concat(parameters('SubnetName'),'-',parameters('AvSetName'),'-LB-INT' )]", 
 	"lbintID": "[resourceId('Microsoft.Network/loadBalancers',variables('LoadBalancerInt'))]",
