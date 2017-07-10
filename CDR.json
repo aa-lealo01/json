@@ -1,0 +1,305 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the administrator of the new VM and the domain. Exclusion list: 'administrator'"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The password for the administrator account of the new VM and the domain"
+      }
+    },
+    "domainToJoin": {
+      "type": "string",
+      "defaultValue": "adc.local"
+    },
+    "domainUsername": {
+      "type": "string",
+      "defaultValue": "aa-lealo01"
+    },
+    "domainpassword": {
+      "type": "securestring"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "Description": "The name of the storage account created to store the VMs disks"
+      }
+    },
+    "SubnetName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Subnet 1 Name"
+      }
+    },
+    "vmNamePrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Name for virtual machine."
+      }
+    },
+    "virtualnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Azure virtual network."
+      }
+    },
+    "frontendIP": {
+      "type": "string",
+      "metadata": {
+        "description": "This is the ip of the load balancer"
+      }
+    },
+    "ResourceGroupVNET": {
+      "type": "string",
+      "defaultValue": "CDCIII-V2"
+    },
+    "AvSetName": {
+      "type": "string"
+    },
+    "Role": {
+      "type": "string",
+      "metadata": {
+        "description": "The function in the DSC script"
+      }
+    },
+	"IndexStart": {
+      "type": "int",
+      "defaultValue": 1,
+	  "metadata": {
+                "description": "Number of instances"
+            }
+    },
+    "VirtualMachineSize": {
+      "type": "string",
+      "defaultValue": "Standard_DS2_v2",
+      "allowedValues": [
+        "Standard_A2",
+        "Standard_A3",
+        "Standard_A4",
+        "Standard_A8",
+        "Standard_A9",
+        "Standard_D2",
+        "Standard_D3",
+        "Standard_D4",
+        "Standard_D13",
+        "Standard_D14",
+		"Standard_DS2",
+        "Standard_DS4",
+        "Standard_DS13",
+        "Standard_DS14",
+		"Standard_D2_v2"
+      ]
+    }
+  },
+  "variables": {
+    "imagePublisher": "MicrosoftWindowsServer",
+    "imageOffer": "WindowsServer",
+    "imageSKU": "2012-R2-Datacenter",
+    "apiVersion": "2015-06-15",
+    "AvailabilitySetName": "[concat(parameters('virtualnetName'),'-',parameters('AvSetName'))]", 
+    "AvailabilitySetId": "[resourceId('Microsoft.Compute/availabilitySets', variables('AvailabilitySetName'))]",
+    "VNetName": "[parameters('virtualnetName')]",
+    "vnetID": "[resourceId(parameters('ResourceGroupVNET'), 'Microsoft.Network/virtualNetworks', variables('VNetName'))]",
+    "NIC_Name": "[concat(parameters('SubnetName'),'-',parameters('vmNamePrefix'))]",
+	"NIC_Id": "[resourceId('Microsoft.Network/networkInterfaces',variables('NIC_Name'))]",
+	"LoadBalancerExt": "[concat(variables('AvailabilitySetName'),'-LB-EXT')]",
+	"lbextID": "[resourceId('Microsoft.Network/loadBalancers',variables('LoadBalancerExt'))]",
+	"PublicIP": "cdcvipublicipcdg",
+	"publicIPID": "[resourceID('Microsoft.Network/publicIPAddresses',variables('PublicIP'))]",
+	"LoadBalancerInt": "[concat(parameters('SubnetName'),'-',parameters('AvSetName'),'-LB-INT' )]", 
+	"lbintID": "[resourceId('Microsoft.Network/loadBalancers',variables('LoadBalancerInt'))]",
+    "subnetid": "[concat(variables('vnetID'),'/subnets/', parameters('SubnetName'))]",
+	"numberOfInstances": 2,
+    "assetLocation": "https://raw.githubusercontent.com/aa-lealo01/json/master/"
+  },
+  "resources": [
+    {
+                                        "type": "Microsoft.Compute/availabilitySets",
+      "apiVersion": "[variables('apiVersion')]",
+      "name": "[variables('AvailabilitySetName')]",
+      "location": "[resourceGroup().location]"
+    },
+    {
+                                    "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "[variables('apiVersion')]",
+      "name": "[concat(variables('NIC_Name'), copyindex(parameters('IndexStart')))]",
+      "location": "[resourceGroup().location]",
+	  "copy": {
+        "name": "nicLoop",
+        "count": "[variables('numberOfInstances')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/loadBalancers/', variables('LoadBalancerInt'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetid')]"
+              },
+		  "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(variables('lbintID'), '/backendAddressPools/InternalLoadBalancerBackendPool')]"
+                }
+         ]
+		}
+		
+		}
+		]
+      }
+    },
+	{
+							"type": "Microsoft.Network/loadBalancers",
+      "apiVersion": "[variables('apiVersion')]",
+      "name": "[variables('LoadBalancerInt')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetid')]"
+              },
+              "privateIPAddress": "[parameters('frontendIP')]",
+              "privateIPAllocationMethod": "Static"
+            },
+            "name": "InternalLoadBalancerFrontend"
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "InternalLoadBalancerBackendPool"
+          }
+        ],
+        "loadBalancingRules": [
+		  {
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('LoadBalancerInt')), '/frontendIpConfigurations/InternalLoadBalancerFrontend')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('LoadBalancerInt')), '/backendAddressPools/InternalLoadBalancerBackendPool')]"
+              },
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('LoadBalancerInt')), '/probes/rdpprobe')]"
+              },
+              "protocol": "tcp",
+              "frontendPort": 3389,
+              "backendPort": 3389
+            },
+            "Name": "rdp-int"
+          }
+        ],
+        "probes": [
+		  {
+            "properties": {
+              "protocol": "tcp",
+              "port": 3389,
+              "intervalInSeconds": 15,
+              "numberOfProbes": 2
+            },
+            "name": "rdpprobe"
+          }
+        ]
+      }
+    },
+    {
+                                "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "[variables('apiVersion')]",
+      "name": "[concat(parameters('vmNamePrefix'), copyindex(parameters('IndexStart')))]",
+	  "copy": {
+        "name": "virtualMachineLoop",
+        "count": "[variables('numberOfInstances')]"
+      },
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+		"[concat('Microsoft.Network/networkInterfaces/', variables('NIC_Name'), copyindex(parameters('IndexStart')))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('VirtualMachineSize')]"
+        },
+        "availabilitySet": {
+          "id": "[variables('AvailabilitySetId')]"
+        },
+        "osProfile": {
+          "computerName": "[concat(parameters('vmNamePrefix'), copyindex(parameters('IndexStart')))]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[variables('imageSKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+                "uri": "[concat('http://',parameters('storageAccountName'),'.blob.core.windows.net/vhds/', parameters('vmNamePrefix'), copyindex(parameters('IndexStart')), '-osdisk.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('NIC_Name'),copyindex(parameters('IndexStart'))))]"
+            }
+          ]
+        },
+		"diagnosticsProfile": {
+          "bootDiagnostics": {
+             "enabled": "true",
+             "storageUri": "[concat('http://',parameters('storageAccountName'),'.blob.core.windows.net')]"
+          }
+        }
+	  },
+	  "resources": [
+        {
+          "apiVersion": "[variables('apiVersion')]",
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "name": "[concat(parameters('vmNamePrefix'), copyindex(parameters('IndexStart')), '/', parameters('Role'))]",
+          "location": "[resourceGroup().location]",
+		  "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines', concat(parameters('vmNamePrefix'), copyindex(parameters('IndexStart'))))]" 
+          ],
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.11",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "ModulesUrl": "[concat(variables('assetLocation'),'/Configuration.zip')]",
+              "ConfigurationFunction": "[concat('Configuration.ps1' ,'\\' , parameters('Role'))]",
+              "Properties": {
+                "domainName": "[parameters('domainToJoin')]",
+                "adminCreds": {
+                  "UserName": "[parameters('domainUsername')]",
+                  "Password": "PrivateSettingsRef:Domainpassword"
+                }
+              }
+            },
+            "protectedSettings": {
+              "Items": {
+                "Domainpassword": "[parameters('domainpassword')]"
+              }
+            }
+          }
+        }
+      ]
+	}
+    ]
+  }  
