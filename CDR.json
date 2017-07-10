@@ -283,7 +283,7 @@
             "autoUpgradeMinorVersion": true,
             "settings": {
               "ModulesUrl": "[concat(variables('assetLocation'),'/Configuration.zip')]",
-              "ConfigurationFunction": "[concat('Configuration.zip.ps1' ,'\\' , parameters('Role'))]",
+              "ConfigurationFunction": "[concat('Configuration.ps1' ,'\\' , parameters('Role'))]",
               "Properties": {
                 "domainName": "[parameters('domainToJoin')]",
                 "adminCreds": {
