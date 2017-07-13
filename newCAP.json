@@ -1,0 +1,208 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the administrator of the new VM and the domain. Exclusion list: 'administrator'"
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The password for the administrator account of the new VM and the domain"
+      }
+    },
+    "domainToJoin": {
+      "type": "string",
+      "defaultValue": "adc.local"
+    },
+    "domainUsername": {
+      "type": "string",
+      "defaultValue": "aa-lealo01"
+    },
+    "domainpassword": {
+      "type": "securestring"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "Description": "The name of the storage account created to store the VMs disks"
+      }
+    },
+    "SubnetName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Subnet 1 Name"
+      }
+    },
+    "vmNamePrefix": {
+      "type": "string",
+      "metadata": {
+        "description": "Name for virtual machine."
+      }
+    },
+    "virtualnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Azure virtual network."
+      }
+    },
+    "frontendIP": {
+      "type": "string",
+      "metadata": {
+        "description": "This is the ip of the load balancer"
+      }
+    },
+    "ResourceGroupVNET": {
+      "type": "string",
+      "defaultValue": "CDCIII-V2"
+    },
+    "AvSetName": {
+      "type": "string"
+    },
+    "Role": {
+      "type": "string",
+      "metadata": {
+        "description": "The function in the DSC script"
+      }
+    },
+	"IndexStart": {
+      "type": "int",
+      "defaultValue": 1,
+	  "metadata": {
+                "description": "Number of instances"
+            }
+    },
+    "VirtualMachineSize": {
+      "type": "string",
+      "defaultValue": "Standard_DS2_v2",
+      "allowedValues": [
+        "Standard_A2",
+        "Standard_A3",
+        "Standard_A4",
+        "Standard_A8",
+        "Standard_A9",
+        "Standard_D2",
+        "Standard_D3",
+        "Standard_D4",
+        "Standard_D13",
+        "Standard_D14",
+		"Standard_DS2",
+        "Standard_DS4",
+        "Standard_DS13",
+        "Standard_DS14",
+		"Standard_D2_v2"
+        },
+        "networkInterfaceName": {
+            "type": "string"
+            "defaultValue": "CAP1001-interface"
+        },
+        "availabilitySetName": {
+            "type": "string"
+            "defaultValue": "CDC1-CAP"
+        },
+        "availabilitySetPlatformFaultDomainCount": {
+            "type": "string"
+            "defaultValue": "1"
+        },
+        "availabilitySetPlatformUpdateDomainCount": {
+            "type": "string"
+            "defaultValue": "2"
+        },
+    },
+    "variables": {
+        "vnetId": "[resourceId('CDCIII-V2','Microsoft.Network/virtualNetworks', parameters('VNetName'))]",
+        "subnetRef": "[concat(variables('vnetId'), '/subnets/', parameters('subnetName'))]"
+    },
+    "resources": [
+        {
+            "name": "[parameters('virtualMachineName')]",
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', parameters('networkInterfaceName'))]",
+                "[concat('Microsoft.Compute/availabilitySets/', parameters('availabilitySetName'))]"
+            ],
+            "properties": {
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachineName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVmAgent": "true"
+                    }
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('virtualMachineSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2012-R2-Datacenter",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "caching": "ReadWrite",
+                        "createOption": "fromImage",
+                        "vhd": {
+                            "uri": "[concat('http://',parameters('storageAccountName'),'.blob.core.windows.net/vhds/', parameters('vmNamePrefix'), copyindex(parameters('IndexStart')), '-osdisk.vhd')]"
+                        },
+                        "name": "osdisk"
+                    },
+                    "dataDisks": []
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaceName'))]"
+                        }
+                    ]
+                },
+                "availabilitySet": {
+                    "id": "[resourceId('Microsoft.Compute/availabilitySets', parameters('availabilitySetName'))]"
+                }
+            }
+        },
+        {
+            "name": "[parameters('availabilitySetName')]",
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[parameters('location')]",
+            "properties": {
+                "platformFaultDomainCount": "[parameters('availabilitySetPlatformFaultDomainCount')]",
+                "platformUpdateDomainCount": "[parameters('availabilitySetPlatformUpdateDomainCount')]"
+            }
+        },
+        {
+            "name": "[parameters('networkInterfaceName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2016-09-01",
+            "location": "[parameters('location')]",
+            "dependsOn": [],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetRef')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic"
+                        }
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {
+        "adminUsername": {
+            "type": "string",
+            "value": "[parameters('adminUsername')]"
+        }
+    }
+}
